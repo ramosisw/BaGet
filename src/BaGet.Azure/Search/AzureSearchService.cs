@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using BaGet.Core.Entities;
 using BaGet.Core.Indexing;
 using BaGet.Core.Search;
+using BaGet.Protocol;
 using Microsoft.Azure.Search;
 using NuGet.Versioning;
 
 namespace BaGet.Azure.Search
 {
-    using System.Threading;
-    using BaGet.Protocol;
     using QueryType = Microsoft.Azure.Search.Models.QueryType;
     using SearchParameters = Microsoft.Azure.Search.Models.SearchParameters;
 
