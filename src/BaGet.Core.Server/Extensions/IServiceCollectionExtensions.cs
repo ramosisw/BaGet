@@ -22,7 +22,9 @@ namespace BaGet.Core.Server.Extensions
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                 });
 
+
             services.AddCors();
+            services.AddHttpContextAccessor();
             services.AddSingleton<IConfigureOptions<CorsOptions>, ConfigureCorsOptions>();
             services.AddSingleton<IConfigureOptions<ForwardedHeadersOptions>, ConfigureForwardedHeadersOptions>();
             services.Configure<FormOptions>(options =>

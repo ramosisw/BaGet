@@ -18,8 +18,9 @@ namespace BaGet.Protocol.Tests
             });
 
             var serviceIndex = new ServiceIndexClient(httpClient, "https://api.nuget.org/v3/index.json");
+            var urlGeneratorFactory = new UrlGeneratorClientFactory(serviceIndex);
 
-            _target = new PackageContentClient(serviceIndex, httpClient);
+            _target = new PackageContentClient(urlGeneratorFactory, httpClient);
         }
 
         [Fact]

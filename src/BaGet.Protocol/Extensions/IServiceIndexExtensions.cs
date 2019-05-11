@@ -51,7 +51,6 @@ namespace BaGet.Protocol
         public static async Task<string> GetPackageMetadataUrlAsync(this IServiceIndex serviceIndex, CancellationToken cancellationToken = default)
         {
             return await GetUrlForResourceTypes(serviceIndex, RegistrationsBaseUrl, cancellationToken);
-
         }
 
         /// <summary>

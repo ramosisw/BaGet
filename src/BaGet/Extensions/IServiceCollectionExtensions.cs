@@ -18,6 +18,7 @@ using BaGet.Core.Metadata;
 using BaGet.Core.Mirror;
 using BaGet.Core.Search;
 using BaGet.Core.Server.Extensions;
+using BaGet.Core.ServiceIndex;
 using BaGet.Core.Storage;
 using BaGet.Database.MySql;
 using BaGet.Database.PostgreSql;
@@ -67,6 +68,7 @@ namespace BaGet.Extensions
             services.AddTransient<ISymbolIndexingService, SymbolIndexingService>();
             services.AddTransient<IBaGetPackageContentService, DatabasePackageContentService>();
             services.AddTransient<IBaGetPackageMetadataService, DatabasePackageMetadataService>();
+            services.AddTransient<IBaGetUrlGenerator, BaGetUrlGenerator>();
             services.AddSingleton<IFrameworkCompatibilityService, FrameworkCompatibilityService>();
             services.AddMirrorServices();
 
@@ -260,7 +262,8 @@ namespace BaGet.Extensions
 
             services.AddTransient<IPackageContentService, PackageContentClient>();
             services.AddTransient<IPackageMetadataService, PackageMetadataClient>();
-            services.AddTransient<IServiceIndex, ServiceIndexClient>();
+            services.AddTransient<IUrlGeneratorFactory, UrlGeneratorClientFactory>();
+            services.AddTransient<IUrlGenerator, UrlGeneratorClient>();
 
             services.AddSingleton<IServiceIndex>(provider =>
             {

@@ -12,24 +12,25 @@ namespace BaGet.Protocol
     /// </summary>
     public class SearchClient : ISearchService
     {
-        private readonly IServiceIndex _serviceIndex;
+        private readonly IUrlGeneratorFactory _urlGenerator;
         private readonly HttpClient _httpClient;
 
         /// <summary>
         /// Create a new Search client.
         /// </summary>
-        /// <param name="serviceIndex">The upstream package source's service index.</param>
+        /// <param name="urlGenerator">The service to generate URLs to upstream resources.</param>
         /// <param name="httpClient">The HTTP client used to send requests.</param>
-        public SearchClient(IServiceIndex serviceIndex, HttpClient httpClient)
+        public SearchClient(IUrlGeneratorFactory urlGenerator, HttpClient httpClient)
         {
-            _serviceIndex = serviceIndex ?? throw new ArgumentNullException(nameof(serviceIndex));
+            _urlGenerator = urlGenerator ?? throw new ArgumentNullException(nameof(urlGenerator));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         /// <inheritdoc />
         public async Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken = default)
         {
-            var autocompleteUrl = await _serviceIndex.GetAutocompleteUrlAsync(cancellationToken);
+            var urlGenerator = await _urlGenerator.CreateAsync();
+            var autocompleteUrl = urlGenerator.GetAutocompleteResourceUrl();
             var param = (request.Type == AutocompleteRequestType.PackageIds) ? "q" : "id";
             var queryString = BuildQueryString(request, param);
 
@@ -43,7 +44,8 @@ namespace BaGet.Protocol
         /// <inheritdoc />
         public async Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken cancellationToken = default)
         {
-            var autocompleteUrl = await _serviceIndex.GetSearchUrlAsync(cancellationToken);
+            var urlGenerator = await _urlGenerator.CreateAsync();
+            var autocompleteUrl = urlGenerator.GetSearchResourceUrl();
             var queryString = BuildQueryString(request, "q");
 
             var url = QueryHelpers.AddQueryString(autocompleteUrl, queryString);

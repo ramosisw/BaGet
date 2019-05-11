@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BaGet.Core.Entities;
 using BaGet.Core.Indexing;
+using BaGet.Core.ServiceIndex;
 using BaGet.Protocol;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,11 +15,13 @@ namespace BaGet.Core.Search
     {
         private readonly IContext _context;
         private readonly IFrameworkCompatibilityService _frameworks;
+        private readonly IBaGetUrlGenerator _url;
 
-        public DatabaseSearchService(IContext context, IFrameworkCompatibilityService frameworks)
+        public DatabaseSearchService(IContext context, IFrameworkCompatibilityService frameworks, IBaGetUrlGenerator url)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _frameworks = frameworks ?? throw new ArgumentNullException(nameof(frameworks));
+            _url = url ?? throw new ArgumentNullException(nameof(url));
         }
 
         public Task IndexAsync(Package package, CancellationToken cancellationToken)
@@ -42,7 +45,7 @@ namespace BaGet.Core.Search
                 var latest = versions.First();
 
                 var versionResults = versions.Select(p => new SearchResultVersion(
-                    /*registrationLeafUrl: */ null,
+                    registrationLeafUrl: _url.GetRegistrationLeafUrl(p.Id, p.Version),
                     p.Version,
                     p.Downloads));
 
@@ -54,7 +57,7 @@ namespace BaGet.Core.Search
                     latest.IconUrlString,
                     latest.LicenseUrlString,
                     latest.ProjectUrlString,
-                    /*registrationUrl:*/ null,
+                    registrationUrl: _url.GetRegistrationIndexUrl(latest.Id),
                     latest.Summary,
                     latest.Tags,
                     latest.Title,

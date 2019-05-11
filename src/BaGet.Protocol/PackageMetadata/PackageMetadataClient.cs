@@ -12,29 +12,27 @@ namespace BaGet.Protocol
     /// </summary>
     public class PackageMetadataClient : IPackageMetadataService
     {
-        private readonly IServiceIndex _serviceIndex;
+        private readonly IUrlGeneratorFactory _urlGenerator;
         private readonly HttpClient _httpClient;
 
         /// <summary>
         /// Create a new Package Metadata client.
         /// </summary>
-        /// <param name="serviceIndex">The upstream package source's service index.</param>
+        /// <param name="urlGenerator">The service to generate URLs to upstream resources.</param>
         /// <param name="httpClient">The HTTP client used to send requests.</param>
-        public PackageMetadataClient(IServiceIndex serviceIndex, HttpClient httpClient)
+        public PackageMetadataClient(IUrlGeneratorFactory urlGenerator, HttpClient httpClient)
         {
-            _serviceIndex = serviceIndex ?? throw new ArgumentNullException(nameof(serviceIndex));
+            _urlGenerator = urlGenerator ?? throw new ArgumentNullException(nameof(urlGenerator));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         /// <inheritdoc />
         public async Task<RegistrationIndexResponse> GetRegistrationIndexOrNullAsync(string id, CancellationToken cancellationToken = default)
         {
-            var packageMetadataUrl = await _serviceIndex.GetPackageMetadataUrlAsync(cancellationToken);
-            var packageId = id.ToLowerInvariant();
-
-            var url = $"{packageMetadataUrl}/{packageId}/index.json";
-
+            var urlGenerator = await _urlGenerator.CreateAsync();
+            var url = urlGenerator.GetRegistrationIndexUrl(id);
             var response = await _httpClient.DeserializeUrlAsync<RegistrationIndexResponse>(url, cancellationToken);
+
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
@@ -50,14 +48,10 @@ namespace BaGet.Protocol
             NuGetVersion upper,
             CancellationToken cancellationToken = default)
         {
-            var packageMetadataUrl = await _serviceIndex.GetPackageMetadataUrlAsync(cancellationToken);
-            var packageId = id.ToLowerInvariant();
-            var lowerVersion = lower.ToNormalizedString().ToLowerInvariant();
-            var upperVersion = upper.ToNormalizedString().ToLowerInvariant();
-
-            var url = $"{packageMetadataUrl}/{packageId}/page/{lowerVersion}/{upperVersion}.json";
-
+            var urlGenerator = await _urlGenerator.CreateAsync();
+            var url = urlGenerator.GetRegistrationPageUrl(id, lower, upper);
             var response = await _httpClient.DeserializeUrlAsync<RegistrationPageResponse>(url, cancellationToken);
+
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
@@ -72,13 +66,10 @@ namespace BaGet.Protocol
             NuGetVersion version,
             CancellationToken cancellationToken = default)
         {
-            var packageMetadataUrl = await _serviceIndex.GetPackageMetadataUrlAsync(cancellationToken);
-            var packageId = id.ToLowerInvariant();
-            var packageVersion = version.ToNormalizedString().ToLowerInvariant();
-
-            var url = $"{packageMetadataUrl}/{packageId}/{packageVersion}.json";
-
+            var urlGenerator = await _urlGenerator.CreateAsync();
+            var url = urlGenerator.GetRegistrationLeafUrl(id, version);
             var response = await _httpClient.DeserializeUrlAsync<RegistrationLeafResponse>(url, cancellationToken);
+
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;

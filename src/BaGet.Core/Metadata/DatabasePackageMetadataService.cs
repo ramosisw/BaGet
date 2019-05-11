@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BaGet.Core.Entities;
 using BaGet.Core.Mirror;
+using BaGet.Core.ServiceIndex;
 using BaGet.Protocol;
 using NuGet.Versioning;
 
@@ -15,11 +16,13 @@ namespace BaGet.Core.Metadata
     {
         private readonly IMirrorService _mirror;
         private readonly IPackageService _packages;
+        private readonly IBaGetUrlGenerator _url;
 
-        public DatabasePackageMetadataService(IMirrorService mirror, IPackageService packages)
+        public DatabasePackageMetadataService(IMirrorService mirror, IPackageService packages, IBaGetUrlGenerator url)
         {
             _mirror = mirror ?? throw new ArgumentNullException(nameof(mirror));
             _packages = packages ?? throw new ArgumentNullException(nameof(packages));
+            _url = url ?? throw new ArgumentNullException(nameof(url));
         }
 
         public async Task<RegistrationIndexResponse> GetRegistrationIndexOrNullAsync(string id, CancellationToken cancellationToken = default)
@@ -51,7 +54,7 @@ namespace BaGet.Core.Metadata
                 pages: new[]
                 {
                     new RegistrationIndexPage(
-                        null, //Url.PackageRegistration(packages.First().Id),
+                        pageUrl: _url.GetRegistrationIndexUrl(packages.First().Id),
                         count: packages.Count(),
                         itemsOrNull: packages.Select(ToRegistrationIndexPageItem).ToList(),
                         lower: versions.Min(),
@@ -75,12 +78,12 @@ namespace BaGet.Core.Metadata
 
             return new RegistrationLeafResponse(
                 type: RegistrationLeafResponse.DefaultType,
-                registrationUri: null, //Url.PackageRegistration(id, nugetVersion),
+                registrationUri: _url.GetRegistrationLeafUrl(id, version),
                 listed: package.Listed,
                 downloads: package.Downloads,
-                packageContentUrl: null, //Url.PackageDownload(id, nugetVersion),
+                packageContentUrl: _url.GetPackageDownloadUrl(id, version),
                 published: package.Published,
-                registrationIndexUrl: null); //Url.PackageRegistration(id));
+                registrationIndexUrl: _url.GetRegistrationIndexUrl(id));
         }
 
         public Task<RegistrationPageResponse> GetRegistrationPageOrNullAsync(
@@ -94,9 +97,9 @@ namespace BaGet.Core.Metadata
 
         private RegistrationIndexPageItem ToRegistrationIndexPageItem(Package package) =>
             new RegistrationIndexPageItem(
-                leafUrl: null,//Url.PackageRegistration(package.Id, package.Version),
-                packageMetadata: new Protocol.PackageMetadata(
-                    catalogUri: null,//Url.PackageRegistration(package.Id, package.Version),
+                leafUrl: _url.GetRegistrationLeafUrl(package.Id, package.Version),
+                packageMetadata: new PackageMetadata(
+                    catalogUri: _url.GetRegistrationLeafUrl(package.Id, package.Version),
                     packageId: package.Id,
                     version: package.Version,
                     authors: string.Join(", ", package.Authors),
@@ -108,7 +111,7 @@ namespace BaGet.Core.Metadata
                     licenseUrl: package.LicenseUrlString,
                     listed: package.Listed,
                     minClientVersion: package.MinClientVersion,
-                    packageContent: null, //Url.PackageDownload(package.Id, package.Version),
+                    packageContent: _url.GetPackageDownloadUrl(package.Id, package.Version),
                     packageTypes: package.PackageTypes.Select(t => t.Name).ToList(),
                     projectUrl: package.ProjectUrlString,
                     repositoryUrl: package.RepositoryUrlString,
@@ -119,7 +122,7 @@ namespace BaGet.Core.Metadata
                     tags: package.Tags,
                     title: package.Title,
                     dependencyGroups: ToDependencyGroups(package)),
-                packageContent: null); //Url.PackageDownload(package.Id, package.Version));
+                packageContent: _url.GetPackageDownloadUrl(package.Id, package.Version));
 
         private IReadOnlyList<DependencyGroupItem> ToDependencyGroups(Package package)
         {
