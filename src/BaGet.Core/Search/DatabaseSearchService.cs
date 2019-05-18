@@ -57,7 +57,7 @@ namespace BaGet.Core.Search
                     latest.IconUrlString,
                     latest.LicenseUrlString,
                     latest.ProjectUrlString,
-                    registrationUrl: _url.GetRegistrationIndexUrl(latest.Id),
+                    registrationIndexUrl: _url.GetRegistrationIndexUrl(latest.Id),
                     latest.Summary,
                     latest.Tags,
                     latest.Title,

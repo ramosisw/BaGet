@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BaGet.Core.Entities;
 using BaGet.Core.Indexing;
 using BaGet.Core.Search;
+using BaGet.Core.ServiceIndex;
 using BaGet.Protocol;
 using Microsoft.Azure.Search;
 using NuGet.Versioning;
@@ -19,15 +20,18 @@ namespace BaGet.Azure.Search
     {
         private readonly BatchIndexer _indexer;
         private readonly SearchIndexClient _searchClient;
+        private readonly IBaGetUrlGenerator _url;
         private readonly IFrameworkCompatibilityService _frameworks;
 
         public AzureSearchService(
             BatchIndexer indexer,
             SearchIndexClient searchClient,
+            IBaGetUrlGenerator url,
             IFrameworkCompatibilityService frameworks)
         {
             _indexer = indexer ?? throw new ArgumentNullException(nameof(indexer));
             _searchClient = searchClient ?? throw new ArgumentNullException(nameof(searchClient));
+            _url = url ?? throw new ArgumentNullException(nameof(url));
             _frameworks = frameworks ?? throw new ArgumentNullException(nameof(frameworks));
         }
 
@@ -70,10 +74,11 @@ namespace BaGet.Azure.Search
 
                 for (var i = 0; i < document.Versions.Length; i++)
                 {
-                    versions.Add(new SearchResultVersion(
-                        /*registrationLeafUrl: */ null,
-                        NuGetVersion.Parse(document.Versions[i]),
-                        long.Parse(document.VersionDownloads[i])));
+                    var downloads = long.Parse(document.VersionDownloads[i]);
+                    var version = NuGetVersion.Parse(document.Versions[i]);
+                    var url = _url.GetRegistrationLeafUrl(document.Id, version);
+
+                    versions.Add(new SearchResultVersion(url, version, downloads));
                 }
 
                 results.Add(new SearchResult(
@@ -84,7 +89,7 @@ namespace BaGet.Azure.Search
                     document.IconUrl,
                     document.LicenseUrl,
                     document.ProjectUrl,
-                    /*registrationUrl:*/ null,
+                    _url.GetRegistrationIndexUrl(document.Id),
                     document.Summary,
                     document.Tags,
                     document.Title,

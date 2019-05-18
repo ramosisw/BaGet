@@ -20,7 +20,7 @@ namespace BaGet.Protocol
             string iconUrl,
             string licenseUrl,
             string projectUrl,
-            string registrationUrl,
+            string registrationIndexUrl,
             string summary,
             IReadOnlyList<string> tags,
             string title,
@@ -42,7 +42,7 @@ namespace BaGet.Protocol
             IconUrl = iconUrl;
             LicenseUrl = licenseUrl;
             ProjectUrl = projectUrl;
-            RegistrationUrl = registrationUrl;
+            RegistrationIndexUrl = registrationIndexUrl;
             Summary = summary;
             Tags = tags;
             Title = title;
@@ -65,7 +65,7 @@ namespace BaGet.Protocol
         public string ProjectUrl { get; }
 
         [JsonProperty(PropertyName = "registration")]
-        public string RegistrationUrl { get; }
+        public string RegistrationIndexUrl { get; }
         public string Summary { get; }
         public IReadOnlyList<string> Tags { get; }
         public string Title { get; }
