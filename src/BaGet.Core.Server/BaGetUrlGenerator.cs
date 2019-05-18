@@ -130,10 +130,12 @@ namespace BaGet
             var request = _httpContextAccessor.HttpContext.Request;
 
             return string.Concat(
-                request.Scheme, "://",
+                request.Scheme,
+                "://",
                 request.Host.ToUriComponent(),
                 request.PathBase.ToUriComponent(),
-                "/", relativePath);
+                "/",
+                relativePath);
         }
     }
 }
