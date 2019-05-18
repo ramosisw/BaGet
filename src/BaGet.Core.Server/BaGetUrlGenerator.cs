@@ -6,6 +6,7 @@ using NuGet.Versioning;
 
 namespace BaGet
 {
+    // TODO: This should validate the "Host" header against known valid values
     public class BaGetUrlGenerator : IBaGetUrlGenerator
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -29,27 +30,40 @@ namespace BaGet
 
         public string GetPackagePublishResourceUrl()
         {
-            return _linkGenerator.GetPathByName(Routes.UploadPackageRouteName, values: null);
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
+                Routes.UploadPackageRouteName,
+                values: null);
         }
 
         public string GetSymbolPublishResourceUrl()
         {
-            return _linkGenerator.GetPathByName(Routes.UploadSymbolRouteName, values: null);
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
+                Routes.UploadSymbolRouteName,
+                values: null);
         }
 
         public string GetSearchResourceUrl()
         {
-            return _linkGenerator.GetPathByName(Routes.SearchRouteName, values: null);
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
+                Routes.SearchRouteName,
+                values: null);
         }
 
         public string GetAutocompleteResourceUrl()
         {
-            return _linkGenerator.GetPathByName(Routes.AutocompleteRouteName, values: null);
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
+                Routes.AutocompleteRouteName,
+                values: null);
         }
 
         public string GetRegistrationIndexUrl(string id)
         {
-            return _linkGenerator.GetPathByName(
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
                 Routes.RegistrationIndexRouteName,
                 values: new { Id = id.ToLowerInvariant() });
         }
@@ -61,7 +75,7 @@ namespace BaGet
 
         public string GetRegistrationLeafUrl(string id, NuGetVersion version)
         {
-            return _linkGenerator.GetPathByName(
+            return _linkGenerator.GetUriByRouteValues(
                 _httpContextAccessor.HttpContext,
                 Routes.RegistrationLeafRouteName,
                 values: new
@@ -73,7 +87,8 @@ namespace BaGet
 
         public string GetPackageVersionsUrl(string id)
         {
-            return _linkGenerator.GetPathByName(
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
                 Routes.PackageVersionsRouteName,
                 values: new { Id = id.ToLowerInvariant() });
         }
@@ -83,7 +98,8 @@ namespace BaGet
             id = id.ToLowerInvariant();
             var versionString = version.ToNormalizedString().ToLowerInvariant();
 
-            return _linkGenerator.GetPathByName(
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
                 Routes.PackageDownloadRouteName,
                 values: new
                 {
@@ -98,7 +114,8 @@ namespace BaGet
             id = id.ToLowerInvariant();
             var versionString = version.ToNormalizedString().ToLowerInvariant();
 
-            return _linkGenerator.GetPathByName(
+            return _linkGenerator.GetUriByRouteValues(
+                _httpContextAccessor.HttpContext,
                 Routes.PackageDownloadRouteName,
                 values: new
                 {
