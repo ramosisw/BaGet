@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace BaGet.Protocol.Tests
     public class ServiceIndexClientTests
     {
         private readonly ServiceIndexClient _target;
+        private readonly Lazy<Task<UrlGeneratorClient>> _Url;
 
         public ServiceIndexClientTests()
         {
@@ -17,6 +19,7 @@ namespace BaGet.Protocol.Tests
             });
 
             _target = new ServiceIndexClient(httpClient, "https://api.nuget.org/v3/index.json");
+            _Url = new Lazy<Task<UrlGeneratorClient>>(() => UrlGeneratorClient.CreateAsync(_target));
         }
 
         [Fact]
@@ -30,7 +33,7 @@ namespace BaGet.Protocol.Tests
         [Fact]
         public async Task GetsPackageContentUrl()
         {
-            var result = await _target.GetPackageContentUrlAsync();
+            var result = (await _Url.Value).GetPackageContentResourceUrl();
 
             Assert.NotNull(result);
         }
@@ -38,7 +41,7 @@ namespace BaGet.Protocol.Tests
         [Fact]
         public async Task GetsPackageMetadataUrl()
         {
-            var result = await _target.GetPackageMetadataUrlAsync();
+            var result = (await _Url.Value).GetPackageMetadataResourceUrl();
 
             Assert.NotNull(result);
         }
@@ -46,7 +49,7 @@ namespace BaGet.Protocol.Tests
         [Fact]
         public async Task GetsSearchUrl()
         {
-            var result = await _target.GetSearchUrlAsync();
+            var result = (await _Url.Value).GetSearchResourceUrl();
 
             Assert.NotNull(result);
         }
@@ -54,7 +57,7 @@ namespace BaGet.Protocol.Tests
         [Fact]
         public async Task GetsAutocompleteUrl()
         {
-            var result = await _target.GetAutocompleteUrlAsync();
+            var result = (await _Url.Value).GetAutocompleteResourceUrl();
 
             Assert.NotNull(result);
         }

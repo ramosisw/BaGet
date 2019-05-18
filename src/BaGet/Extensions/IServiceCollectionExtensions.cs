@@ -263,7 +263,6 @@ namespace BaGet.Extensions
             services.AddTransient<IPackageContentService, PackageContentClient>();
             services.AddTransient<IPackageMetadataService, PackageMetadataClient>();
             services.AddTransient<IUrlGeneratorFactory, UrlGeneratorClientFactory>();
-            services.AddTransient<IUrlGenerator, UrlGeneratorClient>();
 
             services.AddSingleton<IServiceIndex>(provider =>
             {
